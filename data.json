@@ -1,0 +1,14 @@
+[
+  {
+    "id": "1",
+    "titulo": "Lembretes",
+    "texto": "Comprar leite e pão",
+    "criadoEm": "2026-04-28T10:00:00Z"
+  },
+  {
+    "id": "2",
+    "titulo": "Estudar React",
+    "texto": "Revisar hooks useState e useEffect",
+    "criadoEm": "2026-04-28T14:30:00Z"
+  }
+]

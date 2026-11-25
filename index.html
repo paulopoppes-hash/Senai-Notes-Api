@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerenciador de Notas</title>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin: 0; padding: 20px; background: #f5f5f5; }
+    .container { max-width: 700px; margin: 0 auto; }
+    h1 { color: #333; text-align: center; }
+    .card { background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    form { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; }
+    button { background: #007bff; color: #fff; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #0056b3; }
+    button.danger { background: #dc3545; }
+    button.danger:hover { background: #c82333; }
+    #lista-notas { display: grid; gap: 12px; }
+    .nota { background: #fff; padding: 16px; border-radius: 8px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .nota h3 { margin: 0 0 8px 0; color: #333; font-size: 1.1rem; }
+    .nota p { margin: 0 0 12px 0; color: #666; font-size: 0.95rem; }
+    .acoes { display: flex; gap: 8px; }
+    .acao-btn { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.85rem; }
+    .acao-btn.editar { background: #28a745; color: #fff; }
+    .acao-btn.excluir { background: #dc3545; color: #fff; }
+    .vazio { text-align: center; color: #888; padding: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Gerenciador de Notas</h1>
+      <form id="form-nota">
+        <input type="text" id="titulo" placeholder="Título" required />
+        <input type="text" id="texto" placeholder="Texto da nota" required />
+        <button type="submit">Adicionar Nota</button>
+      </form>
+      <div id="lista-notas"></div>
+    </div>
+  </div>
+  <script>
+    const API_URL = 'https://SUA-API-ON-RENDER.onrender.com/api/notes';
+    const form = document.getElementById('form-nota');
+    const lista = document.getElementById('lista-notas');
+
+    async function carregarNotas() {
+      try {
+        const resposta = await fetch(API_URL);
+        const notas = await resposta.json();
+        renderizar(notas);
+      } catch (erro) {
+        lista.innerHTML = '<div class="vazio">Erro ao carregar notas.</div>';
+      }
+    }
+
+    function renderizar(notas) {
+      if (!notas || notas.length === 0) {
+        lista.innerHTML = '<div class="vazio">Nenhuma nota encontrada.</div>';
+        return;
+      }
+      lista.innerHTML = notas.map(nota => `
+        <div class="nota">
+          <div>
+            <h3>${nota.titulo}</h3>
+            <p>${nota.texto}</p>
+          </div>
+          <div class="acoes">
+            <button class="acao-btn editar" onclick="editarNota('${nota.id}', '${nota.titulo}', '${nota.texto}')">Editar</button>
+            <button class="acao-btn excluir" onclick="excluirNota('${nota.id}')">Excluir</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const titulo = document.getElementById('titulo').value;
+      const texto = document.getElementById('texto').value;
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ titulo, texto })
+        });
+        form.reset();
+        carregarNotas();
+      } catch (erro) {
+        alert('Erro ao criar nota.');
+      }
+    });
+
+    window.editarNota = async (id, tituloAtual, textoAtual) => {
+      const novoTitulo = prompt('Novo título:', tituloAtual);
+      const novoTexto = prompt('Novo texto:', textoAtual);
+      if (novoTitulo === null || novoTexto === null) return;
+      try {
+        await fetch(`${API_URL}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ titulo: novoTitulo, texto: novoTexto })
+        });
+        carregarNotas();
+      } catch (erro) {
+        alert('Erro ao editar nota.');
+      }
+    };
+
+    window.excluirNota = async (id) => {
+      if (!confirm('Deseja excluir esta nota?')) return;
+      try {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        carregarNotas();
+      } catch (erro) {
+        alert('Erro ao excluir nota.');
+      }
+    };
+
+    carregarNotas();
+  </script>
+</body>
+</html>
