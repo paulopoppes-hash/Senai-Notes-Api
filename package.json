@@ -1,6 +1,14 @@
 {
+  "name": "senai-notes-api",
+  "version": "1.0.0",
+  "description": "API CRUD de Notas com Express + JSON, front-end e Postman (Aula 5 atividade 2)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
   "dependencies": {
-    "body-parser": "^2.3.0",
-    "express": "^5.2.1"
+    "express": "^4.19.2",
+    "body-parser": "^1.20.2"
   }
 }
